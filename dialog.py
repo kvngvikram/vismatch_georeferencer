@@ -1,3 +1,4 @@
+import contextlib
 import os
 import time
 import numpy as np
@@ -296,28 +297,39 @@ class VisMatchDialog(QDialog):
         self.ed_model.setPlaceholderText("vismatch model name, e.g. superpoint-lightglue, loftr, roma ...")
         self.cb_dev = QComboBox()
         self.cb_dev.addItems(["auto", "cpu", "cuda", "mps"])
-        self.sp_chunk = QSpinBox(); self.sp_chunk.setRange(128, 8192); self.sp_chunk.setValue(1024); self.sp_chunk.setSingleStep(64)
+        self.sp_chunk = QSpinBox()
+        self.sp_chunk.setRange(128, 8192)
+        self.sp_chunk.setValue(1024)
+        self.sp_chunk.setSingleStep(64)
         self.sp_chunk.setToolTip("Size (longest side, px) of the image of each zoomed view that is given to the\n"
                                  "matcher. Larger = more detail and more GCP precision, but more memory and time.\n"
                                  "It does not change what the canvases show.")
-        self.sp_ransac = QDoubleSpinBox(); self.sp_ransac.setRange(0.5, 50); self.sp_ransac.setValue(3.0)
-        self.sp_maxg = QSpinBox(); self.sp_maxg.setRange(3, 10000); self.sp_maxg.setValue(25)
+        self.sp_ransac = QDoubleSpinBox()
+        self.sp_ransac.setRange(0.5, 50)
+        self.sp_ransac.setValue(3.0)
+        self.sp_maxg = QSpinBox()
+        self.sp_maxg.setRange(3, 10000)
+        self.sp_maxg.setValue(25)
         self.sp_maxg.setToolTip("Max GCPs kept per region (chosen from the inliers by 'GCP selection').")
         self.cb_sel = QComboBox()
         self.cb_sel.addItems(["Vismatch score", "Spatial spread"])
         self.cb_sel.setToolTip("How the kept GCPs are chosen when there are more inliers than the maximum:\n"
                                "Vismatch score = highest matcher confidence first (falls back to spatial\n"
                                "spread if the model gives no scores); Spatial spread = farthest-point sampling.")
-        self.sp_mininl = QSpinBox(); self.sp_mininl.setRange(3, 10000); self.sp_mininl.setValue(8)
+        self.sp_mininl = QSpinBox()
+        self.sp_mininl.setRange(3, 10000)
+        self.sp_mininl.setValue(8)
         row = 0
         for lbl, w, c in [("Model:", self.ed_model, 0), ("Device:", self.cb_dev, 2),
                           ("Match size (px):", self.sp_chunk, 4)]:
-            g.addWidget(QLabel(lbl), row, c); g.addWidget(w, row, c + 1)
+            g.addWidget(QLabel(lbl), row, c)
+            g.addWidget(w, row, c + 1)
         g.setColumnStretch(1, 3)
         row = 1
         for lbl, w, c in [("RANSAC thresh (px):", self.sp_ransac, 0), ("Max GCPs / region:", self.sp_maxg, 2),
                           ("Min inliers:", self.sp_mininl, 4), ("GCP selection:", self.cb_sel, 6)]:
-            g.addWidget(QLabel(lbl), row, c); g.addWidget(w, row, c + 1)
+            g.addWidget(QLabel(lbl), row, c)
+            g.addWidget(w, row, c + 1)
         root.addLayout(g)
 
         btns = QHBoxLayout()
@@ -342,7 +354,10 @@ class VisMatchDialog(QDialog):
         self.progress.setMaximumWidth(140)
         self.progress.setVisible(False)
         self.lbl_status = QLabel("Zoom both views to the same approximate area, then match.")
-        btns.addWidget(self.btn_match); btns.addWidget(self.btn_accept); btns.addWidget(self.btn_undo); btns.addWidget(self.btn_discard)
+        btns.addWidget(self.btn_match)
+        btns.addWidget(self.btn_accept)
+        btns.addWidget(self.btn_undo)
+        btns.addWidget(self.btn_discard)
         self.btn_manual = QPushButton("+ Manual GCP")
         self.btn_manual.setCheckable(True)
         self.btn_manual.setToolTip("Add a GCP by hand: click the point on the basemap, then the same point on the\n"
@@ -357,7 +372,8 @@ class VisMatchDialog(QDialog):
                                  "outside the GCP area.")
         self.btn_sync.toggled.connect(self._toggle_sync)
         btns.addWidget(self.btn_sync)
-        btns.addWidget(self.btn_cancel); btns.addWidget(self.progress)
+        btns.addWidget(self.btn_cancel)
+        btns.addWidget(self.progress)
         btns.addWidget(self.lbl_status, 1)
         root.addLayout(btns)
 
@@ -377,21 +393,27 @@ class VisMatchDialog(QDialog):
         h = QHBoxLayout()
         self.ed_points = QLineEdit()
         self.ed_points.setPlaceholderText("GCP .points file (auto-saved on every accept)")
-        b = QPushButton("…"); b.clicked.connect(self._browse_points)
-        h.addWidget(self.ed_points); h.addWidget(b)
+        b = QPushButton("…")
+        b.clicked.connect(self._browse_points)
+        h.addWidget(self.ed_points)
+        h.addWidget(b)
         out.addLayout(h)
         h2 = QHBoxLayout()
         self.btn_del = QPushButton("Delete selected")
         self.btn_clear = QPushButton("Clear all")
         self.btn_save = QPushButton("Save .points")
-        h2.addWidget(self.btn_del); h2.addWidget(self.btn_clear); h2.addWidget(self.btn_save)
+        h2.addWidget(self.btn_del)
+        h2.addWidget(self.btn_clear)
+        h2.addWidget(self.btn_save)
         out.addLayout(h2)
         h3 = QHBoxLayout()
         self.btn_geo = QPushButton("Open QGIS Georeferencer")
         self.cb_order = QComboBox()
         self.cb_order.addItems(["Polynomial 1", "Polynomial 2", "Polynomial 3", "Thin plate spline"])
         self.btn_warp = QPushButton("Warp with GDAL…")
-        h3.addWidget(self.btn_geo); h3.addWidget(self.cb_order); h3.addWidget(self.btn_warp)
+        h3.addWidget(self.btn_geo)
+        h3.addWidget(self.cb_order)
+        h3.addWidget(self.btn_warp)
         out.addLayout(h3)
         h4 = QHBoxLayout()
         h4.addWidget(QLabel("Source coords in .points:"))
@@ -406,12 +428,16 @@ class VisMatchDialog(QDialog):
         out.addLayout(h4)
         h5 = QHBoxLayout()
         h5.addWidget(QLabel("Residual line ×"))
-        self.sp_resscale = QSpinBox(); self.sp_resscale.setRange(1, 10000); self.sp_resscale.setValue(1)
+        self.sp_resscale = QSpinBox()
+        self.sp_resscale.setRange(1, 10000)
+        self.sp_resscale.setValue(1)
         self.sp_resscale.setToolTip("1 = true scale. Residual lines on the canvases are drawn this many times\n"
                                     "longer than the real residual (raise it if they are too small to see).")
         h5.addWidget(self.sp_resscale)
         h5.addWidget(QLabel("Zoom to GCP (px across)"))
-        self.sp_zoompx = QSpinBox(); self.sp_zoompx.setRange(20, 5000); self.sp_zoompx.setValue(200)
+        self.sp_zoompx = QSpinBox()
+        self.sp_zoompx.setRange(20, 5000)
+        self.sp_zoompx.setValue(200)
         self.sp_zoompx.setToolTip("Clicking a GCP in the list shows about this many pixels of each\n"
                                   "raster across the width of its canvas.")
         h5.addWidget(self.sp_zoompx)
@@ -427,7 +453,9 @@ class VisMatchDialog(QDialog):
         hdr.setSortIndicatorShown(True)
         hdr.setSortIndicator(0, Qt.SortOrder.AscendingOrder)
         hdr.sectionClicked.connect(self._on_sort)
-        self.log = QPlainTextEdit(); self.log.setReadOnly(True); self.log.setMaximumHeight(70)
+        self.log = QPlainTextEdit()
+        self.log.setReadOnly(True)
+        self.log.setMaximumHeight(70)
         out.addWidget(self.log)
         bottom.addLayout(out, 2)
         root.addLayout(bottom)
@@ -461,9 +489,11 @@ class VisMatchDialog(QDialog):
         return c
 
     def _wrap(self, title, canvas):
-        w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0, 0, 0, 0)
-        l.addWidget(QLabel("<b>%s</b>  (wheel = zoom, drag = pan)" % title))
-        l.addWidget(canvas, 1)
+        w = QWidget()
+        L = QVBoxLayout(w)
+        L.setContentsMargins(0, 0, 0, 0)
+        L.addWidget(QLabel("<b>%s</b>  (wheel = zoom, drag = pan)" % title))
+        L.addWidget(canvas, 1)
         return w
 
     def _log(self, msg):
@@ -719,11 +749,9 @@ class VisMatchDialog(QDialog):
 
     def _refresh_markers(self):
         for m in self.markers:
-            try:
+            with contextlib.suppress(Exception):
                 m.hide()
                 m.scene().removeItem(m)
-            except Exception:
-                pass
         self.markers = []
         mov = self.cb_move.currentLayer()
         res = getattr(self, "_res", None)
@@ -869,11 +897,9 @@ class VisMatchDialog(QDialog):
 
     def _draw_pending(self):
         for m in self._pend_markers:
-            try:
+            with contextlib.suppress(Exception):
                 m.hide()
                 m.scene().removeItem(m)
-            except Exception:
-                pass
         self._pend_markers = []
         green = QColor(0, 170, 0)
         if "base" in self._pending:

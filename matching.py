@@ -1,4 +1,5 @@
 """Rendering of canvas windows + vismatch worker thread."""
+import contextlib
 import os
 import ctypes
 import threading
@@ -136,11 +137,9 @@ def weight_dirs():
         os.environ.get("HF_HOME", os.path.join(home, ".cache", "huggingface")), "hub")
     dirs.append(hf)
     for name in ("vismatch",):
-        try:
+        with contextlib.suppress(Exception):
             mod = __import__(name)
             dirs.append(os.path.dirname(mod.__file__))
-        except Exception:
-            pass
     return [d for d in dirs if os.path.isdir(d)]
 
 
