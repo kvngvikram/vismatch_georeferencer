@@ -1,5 +1,8 @@
-from qgis.PyQt.QtWidgets import QAction
-from qgis.PyQt.QtGui import QIcon
+try:  # Qt6 (QGIS 4) moved QAction to QtGui
+    from qgis.PyQt.QtGui import QAction, QIcon
+except ImportError:  # Qt5 (QGIS 3)
+    from qgis.PyQt.QtWidgets import QAction
+    from qgis.PyQt.QtGui import QIcon
 
 
 class VisMatchGeorefPlugin:

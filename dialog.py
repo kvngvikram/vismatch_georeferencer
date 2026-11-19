@@ -11,16 +11,24 @@ from qgis.PyQt.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton,
     QSpinBox, QDoubleSpinBox, QComboBox, QSplitter, QWidget, QTableWidget,
     QTableWidgetItem, QFileDialog, QMessageBox, QCompleter, QAbstractItemView,
-    QPlainTextEdit, QApplication, QAction, QProgressBar)
+    QPlainTextEdit, QApplication, QProgressBar)
+try:  # Qt6 (QGIS 4) moved QAction to QtGui
+    from qgis.PyQt.QtGui import QAction
+except ImportError:  # Qt5 (QGIS 3)
+    from qgis.PyQt.QtWidgets import QAction
 
 from qgis.PyQt.QtCore import QTimer
 from .fit import residuals, make_fits, METHODS
 from .matching import render_canvas_window, MatchWorker, list_models, weight_dirs, dir_size
 
 try:
-    RASTER_FILTER = QgsMapLayerProxyModel.Filter.RasterLayer
-except AttributeError:
-    RASTER_FILTER = QgsMapLayerProxyModel.RasterLayer
+    from qgis.core import Qgis
+    RASTER_FILTER = Qgis.LayerFilter.RasterLayer  # QGIS >= 3.32 and QGIS 4
+except (ImportError, AttributeError):
+    try:
+        RASTER_FILTER = QgsMapLayerProxyModel.Filter.RasterLayer
+    except AttributeError:
+        RASTER_FILTER = QgsMapLayerProxyModel.RasterLayer
 
 POINTS_HEADER = "mapX,mapY,sourceX,sourceY,enable,dX,dY,residual"
 
